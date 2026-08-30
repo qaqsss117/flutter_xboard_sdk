@@ -6,7 +6,7 @@ part 'subscription_info.g.dart';
 
 /// 订阅信息数据模型
 @freezed
-class SubscriptionInfo with _$SubscriptionInfo {
+abstract class SubscriptionInfo with _$SubscriptionInfo {
   const factory SubscriptionInfo({
     @JsonKey(name: 'subscribe_url') String? subscribeUrl,
     String? token,

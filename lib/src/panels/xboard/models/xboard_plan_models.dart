@@ -35,7 +35,7 @@ bool _intToBool(dynamic value) {
 int? _boolToInt(bool? value) => value == null ? null : (value ? 1 : 0);
 
 @freezed
-class Plan with _$Plan {
+abstract class Plan with _$Plan {
   const factory Plan({
     required int id,
     @JsonKey(name: 'group_id') required int groupId,
@@ -83,7 +83,7 @@ class Plan with _$Plan {
 }
 
 @freezed
-class PlanResponse with _$PlanResponse {
+abstract class PlanResponse with _$PlanResponse {
   const factory PlanResponse({
     required List<Plan> data,
     int? total,

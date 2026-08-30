@@ -6,7 +6,7 @@ part 'invite_info.g.dart';
 
 /// 邀请信息数据模型
 @freezed
-class InviteInfo with _$InviteInfo {
+abstract class InviteInfo with _$InviteInfo {
   const factory InviteInfo({
     List<InviteCode>? codes,
     InviteStat? stat,  // 单个对象，不是数组
@@ -18,7 +18,7 @@ class InviteInfo with _$InviteInfo {
 
 /// 邀请码数据模型
 @freezed
-class InviteCode with _$InviteCode {
+abstract class InviteCode with _$InviteCode {
   const InviteCode._();
   
   const factory InviteCode({
@@ -39,7 +39,7 @@ class InviteCode with _$InviteCode {
 
 /// 邀请统计数据模型
 @freezed
-class InviteStat with _$InviteStat {
+abstract class InviteStat with _$InviteStat {
   const factory InviteStat({
     @JsonKey(name: 'register_count') int? registerCount,
     @JsonKey(name: 'commission_rate') int? commissionRate,

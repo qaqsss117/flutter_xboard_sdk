@@ -9,7 +9,7 @@ bool _intToBool(int value) => value == 0; // 0表示开启，1表示关闭
 int _boolToInt(bool value) => value ? 0 : 1;
 
 @freezed
-class SystemConfig with _$SystemConfig {
+abstract class SystemConfig with _$SystemConfig {
   const factory SystemConfig({
     @JsonKey(name: 'withdraw_methods') required List<String> withdrawMethods,
     @JsonKey(name: 'withdraw_close', fromJson: _intToBool, toJson: _boolToInt)
@@ -22,7 +22,7 @@ class SystemConfig with _$SystemConfig {
 }
 
 @freezed
-class TransferResult with _$TransferResult {
+abstract class TransferResult with _$TransferResult {
   const factory TransferResult({
     required bool success,
     String? message,
@@ -33,7 +33,7 @@ class TransferResult with _$TransferResult {
 }
 
 @freezed
-class WithdrawResult with _$WithdrawResult {
+abstract class WithdrawResult with _$WithdrawResult {
   const factory WithdrawResult({
     required bool success,
     String? message,
@@ -44,7 +44,7 @@ class WithdrawResult with _$WithdrawResult {
 }
 
 @freezed
-class CommissionHistoryItem with _$CommissionHistoryItem {
+abstract class CommissionHistoryItem with _$CommissionHistoryItem {
   const factory CommissionHistoryItem({
     required int id,
     @JsonKey(name: 'order_amount') required int orderAmount,

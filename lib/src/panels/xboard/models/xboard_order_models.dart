@@ -10,7 +10,7 @@ DateTime? _fromUnixTimestamp(int? timestamp) =>
     timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp * 1000) : null;
 
 @freezed
-class Order with _$Order {
+abstract class Order with _$Order {
   const factory Order({
     @JsonKey(name: 'plan_id') int? planId,
     @JsonKey(name: 'trade_no') String? tradeNo,
@@ -26,7 +26,7 @@ class Order with _$Order {
 }
 
 @freezed
-class OrderPlan with _$OrderPlan {
+abstract class OrderPlan with _$OrderPlan {
   const factory OrderPlan({
     required int id,
     required String name,
@@ -38,7 +38,7 @@ class OrderPlan with _$OrderPlan {
 }
 
 @freezed
-class CreateOrderRequest with _$CreateOrderRequest {
+abstract class CreateOrderRequest with _$CreateOrderRequest {
   const factory CreateOrderRequest({
     @JsonKey(name: 'plan_id') required int planId,
     required String period,
@@ -49,7 +49,7 @@ class CreateOrderRequest with _$CreateOrderRequest {
 }
 
 @freezed
-class SubmitOrderRequest with _$SubmitOrderRequest {
+abstract class SubmitOrderRequest with _$SubmitOrderRequest {
   const factory SubmitOrderRequest({
     @JsonKey(name: 'trade_no') required String tradeNo,
     required String method,
@@ -59,7 +59,7 @@ class SubmitOrderRequest with _$SubmitOrderRequest {
 }
 
 @freezed
-class PaymentMethod with _$PaymentMethod {
+abstract class PaymentMethod with _$PaymentMethod {
   const factory PaymentMethod({
     @JsonKey(fromJson: _idFromJson, toJson: _idToJson)
     required String id, // Custom fromJson/toJson for id
@@ -85,7 +85,7 @@ String _idFromJson(dynamic value) {
 dynamic _idToJson(String value) => value; // No special conversion needed for toJson
 
 @freezed
-class OrderPaymentInfoResponse with _$OrderPaymentInfoResponse {
+abstract class OrderPaymentInfoResponse with _$OrderPaymentInfoResponse {
   const factory OrderPaymentInfoResponse({
     @JsonKey(name: 'payment_methods') required List<PaymentMethod> paymentMethods,
     @JsonKey(name: 'trade_no') required String tradeNo,
@@ -95,7 +95,7 @@ class OrderPaymentInfoResponse with _$OrderPaymentInfoResponse {
 }
 
 @freezed
-class OrderResponse with _$OrderResponse {
+abstract class OrderResponse with _$OrderResponse {
   const factory OrderResponse({
     required List<Order> data, // Renamed from orders to data to match ApiResponse
     int? total,

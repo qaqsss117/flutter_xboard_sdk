@@ -8,7 +8,7 @@ DateTime _fromUnixTimestamp(int timestamp) => DateTime.fromMillisecondsSinceEpoc
 int _toUnixTimestamp(DateTime date) => date.millisecondsSinceEpoch ~/ 1000;
 
 @freezed
-class TicketModel with _$TicketModel {
+abstract class TicketModel with _$TicketModel {
   const factory TicketModel({
     required int id,
     required int level,
@@ -25,7 +25,7 @@ class TicketModel with _$TicketModel {
 }
 
 @freezed
-class TicketMessageModel with _$TicketMessageModel {
+abstract class TicketMessageModel with _$TicketMessageModel {
   const factory TicketMessageModel({
     required int id,
     @JsonKey(name: 'ticket_id') required int ticketId,
@@ -39,7 +39,7 @@ class TicketMessageModel with _$TicketMessageModel {
 }
 
 @freezed
-class TicketDetailModel with _$TicketDetailModel {
+abstract class TicketDetailModel with _$TicketDetailModel {
   const factory TicketDetailModel({
     required int id,
     required int level,

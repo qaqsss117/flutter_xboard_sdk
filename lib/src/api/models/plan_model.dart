@@ -30,7 +30,7 @@ bool _intToBool(dynamic value) {
 int? _boolToInt(bool? value) => value == null ? null : (value ? 1 : 0);
 
 @freezed
-class PlanModel with _$PlanModel {
+abstract class PlanModel with _$PlanModel {
   const factory PlanModel({
     required int id,
     @JsonKey(name: 'group_id') required int groupId,

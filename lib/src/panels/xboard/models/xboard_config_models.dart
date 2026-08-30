@@ -5,7 +5,7 @@ part 'xboard_config_models.freezed.dart';
 part 'xboard_config_models.g.dart';
 
 @freezed
-class ConfigData with _$ConfigData {
+abstract class ConfigData with _$ConfigData {
   const factory ConfigData({
     @JsonKey(name: 'tos_url') String? tosUrl,
     @JsonKey(name: 'is_email_verify', fromJson: _intToBoolSafe, toJson: _boolToInt)
@@ -67,7 +67,7 @@ dynamic _emailWhitelistToJson(List<String> value) {
 
 
 @freezed
-class ConfigResponse with _$ConfigResponse {
+abstract class ConfigResponse with _$ConfigResponse {
   const factory ConfigResponse({
     required String status,
     required String message,

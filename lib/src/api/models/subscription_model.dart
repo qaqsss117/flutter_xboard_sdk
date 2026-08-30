@@ -10,7 +10,7 @@ int? _toUnixTimestamp(DateTime? dateTime) =>
     dateTime != null ? dateTime.millisecondsSinceEpoch ~/ 1000 : null;
 
 @freezed
-class SubscriptionModel with _$SubscriptionModel {
+abstract class SubscriptionModel with _$SubscriptionModel {
   const factory SubscriptionModel({
     @JsonKey(name: 'subscribe_url') String? subscribeUrl,
     SubscriptionPlanModel? plan,
@@ -37,7 +37,7 @@ class SubscriptionModel with _$SubscriptionModel {
 }
 
 @freezed
-class SubscriptionPlanModel with _$SubscriptionPlanModel {
+abstract class SubscriptionPlanModel with _$SubscriptionPlanModel {
   const factory SubscriptionPlanModel({
     String? name,
     int? id,

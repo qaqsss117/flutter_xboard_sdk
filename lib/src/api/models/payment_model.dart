@@ -5,7 +5,7 @@ part 'payment_model.freezed.dart';
 part 'payment_model.g.dart';
 
 @freezed
-class PaymentMethodModel with _$PaymentMethodModel {
+abstract class PaymentMethodModel with _$PaymentMethodModel {
   const factory PaymentMethodModel({
     required String id,
     required String name,
@@ -26,7 +26,7 @@ class PaymentMethodModel with _$PaymentMethodModel {
 }
 
 @freezed
-class PaymentResultModel with _$PaymentResultModel {
+abstract class PaymentResultModel with _$PaymentResultModel {
   const factory PaymentResultModel.success({
     String? transactionId,
     String? message,

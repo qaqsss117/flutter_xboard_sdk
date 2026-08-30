@@ -8,7 +8,7 @@ DateTime _fromUnixTimestamp(int timestamp) => DateTime.fromMillisecondsSinceEpoc
 int _toUnixTimestamp(DateTime date) => date.millisecondsSinceEpoch ~/ 1000;
 
 @freezed
-class InviteCodeModel with _$InviteCodeModel {
+abstract class InviteCodeModel with _$InviteCodeModel {
   const factory InviteCodeModel({
     @JsonKey(name: 'user_id') required int userId,
     required String code,
@@ -26,7 +26,7 @@ class InviteCodeModel with _$InviteCodeModel {
 }
 
 @freezed
-class InviteInfoModel with _$InviteInfoModel {
+abstract class InviteInfoModel with _$InviteInfoModel {
   @JsonSerializable(explicitToJson: true)
   const factory InviteInfoModel({
     required List<InviteCodeModel> codes,
@@ -51,7 +51,7 @@ class InviteInfoModel with _$InviteInfoModel {
 }
 
 @freezed
-class CommissionDetailModel with _$CommissionDetailModel {
+abstract class CommissionDetailModel with _$CommissionDetailModel {
   const factory CommissionDetailModel({
     required int id,
     @JsonKey(name: 'order_amount') required int orderAmount,

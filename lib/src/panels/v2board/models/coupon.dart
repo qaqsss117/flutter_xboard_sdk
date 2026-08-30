@@ -6,7 +6,7 @@ part 'coupon.g.dart';
 
 /// 优惠券数据模型
 @freezed
-class Coupon with _$Coupon {
+abstract class Coupon with _$Coupon {
   const Coupon._();
   
   const factory Coupon({

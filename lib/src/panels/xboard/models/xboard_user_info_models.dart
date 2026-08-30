@@ -32,7 +32,7 @@ String? _telegramIdFromJson(dynamic value) {
 dynamic _telegramIdToJson(String? value) => value;
 
 @freezed
-class UserInfo with _$UserInfo {
+abstract class UserInfo with _$UserInfo {
   const factory UserInfo({
     required String email,
     @JsonKey(name: 'transfer_enable') @Default(0) double transferEnable,

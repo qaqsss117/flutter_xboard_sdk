@@ -30,7 +30,7 @@ dynamic _emailWhitelistToJson(List<String> value) {
 }
 
 @freezed
-class ConfigModel with _$ConfigModel {
+abstract class ConfigModel with _$ConfigModel {
   const factory ConfigModel({
     @JsonKey(name: 'tos_url') String? tosUrl,
     @JsonKey(name: 'is_email_verify', fromJson: _intToBoolSafe, toJson: _boolToInt)

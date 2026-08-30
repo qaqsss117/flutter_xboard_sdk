@@ -25,7 +25,7 @@ String? _telegramIdFromJson(dynamic value) {
 dynamic _telegramIdToJson(String? value) => value;
 
 @freezed
-class UserModel with _$UserModel {
+abstract class UserModel with _$UserModel {
   const factory UserModel({
     required String email,
     @JsonKey(name: 'transfer_enable') @Default(0) double transferEnable,

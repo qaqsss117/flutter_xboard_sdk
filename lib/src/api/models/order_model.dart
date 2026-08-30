@@ -9,7 +9,7 @@ DateTime? _fromUnixTimestamp(int? timestamp) =>
     timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp * 1000) : null;
 
 @freezed
-class OrderModel with _$OrderModel {
+abstract class OrderModel with _$OrderModel {
   const factory OrderModel({
     @JsonKey(name: 'plan_id') int? planId,
     @JsonKey(name: 'trade_no') String? tradeNo,
@@ -25,7 +25,7 @@ class OrderModel with _$OrderModel {
 }
 
 @freezed
-class OrderPlanModel with _$OrderPlanModel {
+abstract class OrderPlanModel with _$OrderPlanModel {
   const factory OrderPlanModel({
     required int id,
     required String name,

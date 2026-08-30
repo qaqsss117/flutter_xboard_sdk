@@ -6,7 +6,7 @@ part 'payment_method.g.dart';
 
 /// 支付方式数据模型
 @freezed
-class PaymentMethod with _$PaymentMethod {
+abstract class PaymentMethod with _$PaymentMethod {
   const PaymentMethod._();
   
   const factory PaymentMethod({

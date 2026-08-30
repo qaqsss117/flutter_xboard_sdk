@@ -6,7 +6,7 @@ part 'user_info.g.dart';
 
 /// 用户信息数据模型
 @freezed
-class UserInfo with _$UserInfo {
+abstract class UserInfo with _$UserInfo {
   const UserInfo._();
   
   const factory UserInfo({

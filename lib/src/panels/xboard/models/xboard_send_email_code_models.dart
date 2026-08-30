@@ -5,7 +5,7 @@ part 'xboard_send_email_code_models.g.dart';
 
 /// 验证码发送响应
 @freezed
-class VerificationCodeResponse with _$VerificationCodeResponse {
+abstract class VerificationCodeResponse with _$VerificationCodeResponse {
   const factory VerificationCodeResponse({
     required bool success,
     String? message,

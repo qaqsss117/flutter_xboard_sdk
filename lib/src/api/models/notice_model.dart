@@ -16,7 +16,7 @@ bool _showFromJson(dynamic value) {
 dynamic _showToJson(bool value) => value ? 1 : 0;
 
 @freezed
-class NoticeModel with _$NoticeModel {
+abstract class NoticeModel with _$NoticeModel {
   const factory NoticeModel({
     required int id,
     required String title,

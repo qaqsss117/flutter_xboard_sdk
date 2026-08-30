@@ -46,7 +46,7 @@ enum PaymentStatus {
 }
 
 @freezed
-class PaymentStatusResult with _$PaymentStatusResult {
+abstract class PaymentStatusResult with _$PaymentStatusResult {
   const factory PaymentStatusResult({
     required bool isSuccess,
     required bool isCanceled,
@@ -105,7 +105,7 @@ double _parseDouble(dynamic value) {
 }
 
 @freezed
-class PaymentMethodInfo with _$PaymentMethodInfo {
+abstract class PaymentMethodInfo with _$PaymentMethodInfo {
   const factory PaymentMethodInfo({
     required String id,
     required String name,
@@ -150,7 +150,7 @@ class PaymentMethodInfo with _$PaymentMethodInfo {
 }
 
 @freezed
-class PaymentOrderInfo with _$PaymentOrderInfo {
+abstract class PaymentOrderInfo with _$PaymentOrderInfo {
   const factory PaymentOrderInfo({
     required String tradeNo,
     required double originalAmount,
@@ -245,7 +245,7 @@ sealed class PaymentError with _$PaymentError {
 }
 
 @freezed
-class PaymentState with _$PaymentState {
+abstract class PaymentState with _$PaymentState {
   const factory PaymentState({
     PaymentOrderInfo? orderInfo,
     @Default(PaymentStatus.initial) PaymentStatus status,
@@ -274,7 +274,7 @@ class PaymentState with _$PaymentState {
 }
 
 @freezed
-class PaymentRequest with _$PaymentRequest {
+abstract class PaymentRequest with _$PaymentRequest {
   const factory PaymentRequest({
     @JsonKey(name: 'trade_no') required String tradeNo,
     required String method,
@@ -284,7 +284,7 @@ class PaymentRequest with _$PaymentRequest {
 }
 
 @freezed
-class PaymentResponse with _$PaymentResponse {
+abstract class PaymentResponse with _$PaymentResponse {
   const factory PaymentResponse({
     required bool success,
     String? message,

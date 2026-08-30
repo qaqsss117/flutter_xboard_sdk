@@ -6,7 +6,7 @@ part 'order.g.dart';
 
 /// 订单数据模型
 @freezed
-class Order with _$Order {
+abstract class Order with _$Order {
   const Order._();
   
   const factory Order({

@@ -21,7 +21,7 @@ bool _showFromJson(dynamic value) {
 dynamic _showToJson(bool value) => value ? 1 : 0;
 
 @freezed
-class Notice with _$Notice {
+abstract class Notice with _$Notice {
   const factory Notice({
     required int id,
     required String title,
@@ -40,7 +40,7 @@ class Notice with _$Notice {
 }
 
 @freezed
-class NoticeResponse with _$NoticeResponse {
+abstract class NoticeResponse with _$NoticeResponse {
   const factory NoticeResponse({
     required List<Notice> data, // Renamed from notices to data to match ApiResponse
     required int total,

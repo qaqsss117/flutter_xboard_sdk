@@ -6,7 +6,7 @@ part 'notice.g.dart';
 
 /// 公告数据模型
 @freezed
-class Notice with _$Notice {
+abstract class Notice with _$Notice {
   const Notice._();
   
   const factory Notice({

@@ -22,7 +22,7 @@ bool _intToBool(dynamic value) {
 int? _boolToInt(bool? value) => value == null ? null : (value ? 1 : 0);
 
 @freezed
-class CouponData with _$CouponData {
+abstract class CouponData with _$CouponData {
   const factory CouponData({
     int? id, // Changed from String? to int?
     String? name,
@@ -49,7 +49,7 @@ class CouponData with _$CouponData {
 }
 
 @freezed
-class CouponResponse with _$CouponResponse {
+abstract class CouponResponse with _$CouponResponse {
   const factory CouponResponse({
     required bool success,
     String? message,

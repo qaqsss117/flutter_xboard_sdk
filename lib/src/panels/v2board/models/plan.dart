@@ -6,7 +6,7 @@ part 'plan.g.dart';
 
 /// 套餐计划数据模型
 @freezed
-class Plan with _$Plan {
+abstract class Plan with _$Plan {
   const Plan._();
   
   const factory Plan({

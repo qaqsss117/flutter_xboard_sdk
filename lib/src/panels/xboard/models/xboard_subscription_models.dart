@@ -12,7 +12,7 @@ int? _toUnixTimestamp(DateTime? dateTime) =>
 
 /// 计划详情模型
 @freezed
-class PlanDetails with _$PlanDetails {
+abstract class PlanDetails with _$PlanDetails {
   const factory PlanDetails({
     String? name,
     int? id,
@@ -27,7 +27,7 @@ class PlanDetails with _$PlanDetails {
 
 /// 订阅信息模型
 @freezed
-class SubscriptionInfo with _$SubscriptionInfo {
+abstract class SubscriptionInfo with _$SubscriptionInfo {
   const factory SubscriptionInfo({
     @JsonKey(name: 'subscribe_url') String? subscribeUrl,
     PlanDetails? plan,
@@ -105,7 +105,7 @@ class SubscriptionStats {
 
 /// 订阅响应模型
 @freezed
-class SubscriptionResponse with _$SubscriptionResponse {
+abstract class SubscriptionResponse with _$SubscriptionResponse {
   const factory SubscriptionResponse({
     required bool success,
     String? message,

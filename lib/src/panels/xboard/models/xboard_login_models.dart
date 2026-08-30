@@ -6,7 +6,7 @@ part 'xboard_login_models.g.dart';
 
 /// 登录请求模型
 @freezed
-class LoginRequest with _$LoginRequest {
+abstract class LoginRequest with _$LoginRequest {
   const factory LoginRequest({
     required String email,
     required String password,
@@ -17,7 +17,7 @@ class LoginRequest with _$LoginRequest {
 
 /// 登录数据模型
 @freezed
-class LoginData with _$LoginData {
+abstract class LoginData with _$LoginData {
   const factory LoginData({
     String? token,
     @JsonKey(name: 'auth_data') String? authData,
@@ -29,7 +29,7 @@ class LoginData with _$LoginData {
 
 /// 登录响应模型 - 兼容XBoard API格式
 @freezed
-class LoginResponse with _$LoginResponse {
+abstract class LoginResponse with _$LoginResponse {
   const factory LoginResponse({
     required bool success,
     String? message,

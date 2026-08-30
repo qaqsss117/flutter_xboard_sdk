@@ -4,7 +4,7 @@ part 'xboard_app_models.freezed.dart';
 part 'xboard_app_models.g.dart';
 
 @freezed
-class AppInfo with _$AppInfo {
+abstract class AppInfo with _$AppInfo {
   const factory AppInfo({
     required String name,
     required String icon,
