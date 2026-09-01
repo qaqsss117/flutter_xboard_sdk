@@ -34,16 +34,31 @@ class XBoardOrderAdapter implements OrderApi {
   @override
   Future<PaymentResultModel> checkoutOrder(String tradeNo, String method) async {
     final response = await _api.submitPayment(tradeNo: tradeNo, method: method);
-    
-    if (response.type == 1) { // Redirect
-      return PaymentResultModel.redirect(url: response.data as String);
-    } else if (response.type == 0 || response.type == -1) { // Free/Success (XBoard uses -1 for free, 0 for success sometimes?)
-       // Need to verify type codes. Assuming 0/-1 is success or handled.
-       // If data is bool true, it's success.
-       return PaymentResultModel.success(message: 'Payment successful');
-    } else {
-      return PaymentResultModel.failed(message: 'Unknown payment result type: ${response.type}');
+
+    if (response.type == -1 && response.data == true) {
+      return const PaymentResultModel.success(message: 'Payment successful');
     }
+
+    final paymentData = response.data;
+    if (paymentData is! String || paymentData.isEmpty) {
+      return PaymentResultModel.failed(
+        message: 'Invalid payment data for type: ${response.type}',
+      );
+    }
+
+    if (response.type == 0) {
+      return PaymentResultModel.redirect(
+        url: paymentData,
+        method: 'qr_code',
+      );
+    }
+    if (response.type == 1) {
+      return PaymentResultModel.redirect(url: paymentData);
+    }
+
+    return PaymentResultModel.failed(
+      message: 'Unknown payment result type: ${response.type}',
+    );
   }
 
   @override
