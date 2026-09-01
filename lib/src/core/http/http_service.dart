@@ -8,12 +8,14 @@ import '../exceptions/xboard_exceptions.dart';
 import '../auth/token_manager.dart';
 import '../auth/auth_interceptor.dart';
 import '../logging/sdk_logger.dart';
+import '../security/encrypted_gateway_protocol.dart';
 import 'http_config.dart';
 
 class HttpService {
   final String baseUrl;
   final HttpConfig httpConfig;
   late final Dio _dio;
+  EncryptedGatewayClient? _encryptedGatewayClient;
   TokenManager? _tokenManager;
   AuthInterceptor? _authInterceptor;
   String? _expectedCertificatePem;
@@ -30,9 +32,22 @@ class HttpService {
     String baseUrl, {
     TokenManager? tokenManager,
     HttpConfig? httpConfig,
+    bool requireEncryptedGateway = false,
   }) async {
     final config = httpConfig ?? HttpConfig.defaultConfig();
+    if (requireEncryptedGateway && config.encryptedGateway == null) {
+      throw ConfigException('Encrypted gateway is required but not configured');
+    }
     final service = HttpService._internal(baseUrl, config, tokenManager);
+
+    if (config.encryptedGateway != null) {
+      final gateway = config.encryptedGateway!;
+      service._encryptedGatewayClient = await EncryptedGatewayClient.create(
+        keyRing: gateway.keyRing,
+        allowedClockSkew: gateway.allowedClockSkew,
+        paddingPolicy: GatewayPaddingPolicy(maxEnvelopeSize: gateway.maxEnvelopeSize),
+      );
+    }
     
     // 如果启用证书固定，先加载证书
     if (config.enableCertificatePinning == true) {
@@ -104,20 +119,78 @@ class HttpService {
       return client;
     };
 
-    // 添加拦截器（生产环境移除日志拦截器）
+    // 认证必须先运行，使 Authorization 被加密进内层信封。
+    if (_tokenManager != null) {
+      _authInterceptor = AuthInterceptor(tokenManager: _tokenManager!);
+      _dio.interceptors.add(_authInterceptor!);
+    }
 
     // 添加请求日志和响应格式化拦截器
     _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        // 打印请求信息和代理状态
-        final fullUrl = options.uri.toString();
+      onRequest: (options, handler) async {
+        if (_encryptedGatewayClient != null) {
+          try {
+            await _encryptRequestOptions(options);
+          } catch (error) {
+            handler.reject(DioException(
+              requestOptions: options,
+              type: DioExceptionType.unknown,
+              error: error,
+              message: 'Failed to encrypt gateway request',
+            ));
+            return;
+          }
+        }
+
+        // 打印请求信息和代理状态（隐藏 query，避免泄漏 token 等敏感参数）
         final proxyStatus = httpConfig.proxyUrl != null && httpConfig.proxyUrl!.isNotEmpty;
         final proxyInfo = proxyStatus ? httpConfig.proxyUrl : 'DIRECT';
-        SdkLogger.d('[XBoardSDK] 📡 ${options.method} $fullUrl | proxy: $proxyStatus ($proxyInfo)');
+        SdkLogger.d('[XBoardSDK] request ${options.method} ${_sanitizedUri(options.uri)} | proxy: $proxyStatus ($proxyInfo)');
 
         handler.next(options);
       },
-      onResponse: (response, handler) {
+      onResponse: (response, handler) async {
+        if (response.requestOptions.extra[_gatewayRequestIdKey] case final List<int> requestId) {
+          try {
+            final payload = await _encryptedGatewayClient!.decryptResponse(
+              _expectByteResponse(response.data),
+              expectedRequestId: requestId,
+            );
+            response
+              ..statusCode = payload.statusCode
+              ..headers = Headers.fromMap(
+                payload.headers.map((name, value) => MapEntry(name, [value])),
+              );
+
+            if (response.requestOptions.extra[_rawGatewayResponseKey] == true) {
+              response.data = payload.body;
+            } else {
+              response.data = _decodeGatewayBody(payload);
+            }
+
+            if (payload.statusCode < 200 || payload.statusCode >= 300) {
+              handler.reject(_handleDioError(DioException.badResponse(
+                statusCode: payload.statusCode,
+                requestOptions: response.requestOptions,
+                response: response,
+              )));
+              return;
+            }
+            if (response.requestOptions.extra[_rawGatewayResponseKey] == true) {
+              handler.next(response);
+              return;
+            }
+          } catch (error) {
+            handler.reject(DioException(
+              requestOptions: response.requestOptions,
+              type: DioExceptionType.unknown,
+              error: error,
+              message: 'Encrypted gateway response validation failed',
+            ));
+            return;
+          }
+        }
+
         // 检查是否需要解混淆
         response.data = _deobfuscateResponse(response);
         response.data = _normalizeResponse(response.data);
@@ -129,11 +202,6 @@ class HttpService {
       },
     ));
 
-    // 添加认证拦截器（最后添加，确保它能处理认证相关错误）
-    if (_tokenManager != null) {
-      _authInterceptor = AuthInterceptor(tokenManager: _tokenManager!);
-      _dio.interceptors.add(_authInterceptor!);
-    }
   }
 
   /// 设置TokenManager
@@ -145,9 +213,104 @@ class HttpService {
       _dio.interceptors.remove(_authInterceptor!);
     }
     
-    // 添加新的认证拦截器
+    // 认证必须保持在加密拦截器之前。
     _authInterceptor = AuthInterceptor(tokenManager: tokenManager);
-    _dio.interceptors.add(_authInterceptor!);
+    _dio.interceptors.insert(0, _authInterceptor!);
+  }
+
+  Future<void> _encryptRequestOptions(RequestOptions options) async {
+    final gateway = httpConfig.encryptedGateway!;
+    final originalUri = options.uri;
+    final headers = <String, String>{};
+    const allowedHeaders = {
+      'accept',
+      'accept-language',
+      'authorization',
+      'user-agent',
+      'x-client-version',
+    };
+    for (final entry in options.headers.entries) {
+      final name = entry.key.toLowerCase();
+      if (allowedHeaders.contains(name)) {
+        headers[name] = entry.value.toString();
+      }
+    }
+    final query = <GatewayQueryParameter>[];
+    for (final entry in originalUri.queryParametersAll.entries) {
+      for (final value in entry.value) {
+        query.add(GatewayQueryParameter(entry.key, value));
+      }
+    }
+    final contentType = options.contentType ?? options.headers['Content-Type']?.toString();
+    final encrypted = await _encryptedGatewayClient!.encryptRequest(
+      GatewayRequestPayload(
+        method: options.method,
+        path: originalUri.path,
+        query: query,
+        headers: headers,
+        body: _encodeRequestBody(options.data),
+        contentType: contentType,
+      ),
+    );
+
+    options.extra[_gatewayRequestIdKey] = encrypted.requestId;
+    options
+      ..method = 'POST'
+      ..path = gateway.path
+      ..data = encrypted.bytes
+      ..responseType = ResponseType.bytes
+      ..contentType = 'application/octet-stream';
+    options.queryParameters.clear();
+    options.headers
+      ..clear()
+      ..addAll({
+        'Accept': 'application/octet-stream',
+        'Content-Type': 'application/octet-stream',
+        'User-Agent': httpConfig.userAgent ?? 'Mozilla/5.0',
+      });
+  }
+
+  List<int> _encodeRequestBody(dynamic data) {
+    if (data == null) {
+      return const [];
+    }
+    if (data is Uint8List) {
+      return data;
+    }
+    if (data is List<int>) {
+      return data;
+    }
+    if (data is String) {
+      return utf8.encode(data);
+    }
+    if (data is Map || data is List || data is num || data is bool) {
+      return utf8.encode(jsonEncode(data));
+    }
+    throw GatewayProtocolException('Unsupported encrypted request body type');
+  }
+
+  List<int> _expectByteResponse(dynamic data) {
+    if (data is List<int>) {
+      return data;
+    }
+    throw GatewayProtocolException('Encrypted gateway returned a non-binary response');
+  }
+
+  /// 日志用途：去掉 query 部分，避免明文模式下打印 token 等敏感参数。
+  String _sanitizedUri(Uri uri) {
+    return uri.query.isEmpty ? uri.toString() : uri.replace(query: '').toString();
+  }
+
+  dynamic _decodeGatewayBody(GatewayResponsePayload payload) {
+    if (payload.body.isEmpty) {
+      return '';
+    }
+    final text = utf8.decode(payload.body, allowMalformed: false);
+    final contentType = payload.headers['content-type']?.toLowerCase() ?? '';
+    if (contentType.contains('json') || text.trimLeft().startsWith('{') || text.trimLeft().startsWith('[')) {
+      return jsonDecode(text);
+    }
+    return text;
   }
 
   /// 发送GET请求
@@ -205,6 +368,37 @@ class HttpService {
       return response.data as Map<String, dynamic>;
     } catch (e) {
       throw _convertDioError(e);
+    }
+  }
+
+  /// 通过加密网关获取原始响应字节，不允许回退到明文 HTTP。
+  Future<RawHttpResponse> getEncryptedRawRequest(
+    String path, {
+    Map<String, String>? headers,
+  }) async {
+    if (_encryptedGatewayClient == null) {
+      throw ConfigException('Encrypted gateway is required for raw requests');
+    }
+    try {
+      final response = await _dio.get<List<int>>(
+        path,
+        options: Options(
+          headers: headers,
+          responseType: ResponseType.bytes,
+          extra: const {_rawGatewayResponseKey: true},
+        ),
+      );
+      final responseHeaders = <String, String>{};
+      response.headers.forEach((name, values) {
+        responseHeaders[name] = values.join(', ');
+      });
+      return RawHttpResponse(
+        statusCode: response.statusCode ?? 200,
+        headers: responseHeaders,
+        body: Uint8List.fromList(response.data ?? const []),
+      );
+    } catch (error) {
+      throw _convertDioError(error);
     }
   }
 
@@ -341,8 +535,6 @@ class HttpService {
       
       SdkLogger.i('[HttpService] ✅ 证书加载成功！');
       SdkLogger.i('[HttpService]   - 证书内容长度: ${certContent.length} 字符');
-      SdkLogger.i('[HttpService]   - 证书前100字符: ${certContent.substring(0, 100.clamp(0, certContent.length))}');
-      
     } catch (error) {
       _certificateLoadFailed = true;
       _expectedCertificatePem = null;
@@ -398,9 +590,6 @@ class HttpService {
       
       String errorMessage = '请求失败 (状态码: $statusCode)';
       
-      // 打印响应数据以便调试
-      SdkLogger.w('[HttpService] Error Response (status: $statusCode): $responseData');
-      
       // 尝试从响应中提取错误信息
       if (responseData is Map<String, dynamic>) {
         // 优先级：message > error > data
@@ -426,7 +615,7 @@ class HttpService {
         errorMessage = responseData;
       }
       
-      SdkLogger.w('[HttpService] Extracted error message: $errorMessage');
+      SdkLogger.w('[HttpService] Request failed with status $statusCode');
 
       // 创建新的DioException，保持原有的错误信息但添加我们的错误消息
       return DioException(
@@ -528,4 +717,19 @@ class HttpService {
       'password': password,
     };
   }
-} 
+}
+
+const _gatewayRequestIdKey = 'encrypted_gateway.request_id';
+const _rawGatewayResponseKey = 'encrypted_gateway.raw_response';
+
+class RawHttpResponse {
+  const RawHttpResponse({
+    required this.statusCode,
+    required this.headers,
+    required this.body,
+  });
+
+  final int statusCode;
+  final Map<String, String> headers;
+  final Uint8List body;
+}

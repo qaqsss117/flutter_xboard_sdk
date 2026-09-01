@@ -6,6 +6,10 @@ export 'src/xboard_sdk.dart';
 // ========== 核心基础设施 ==========
 // HTTP配置 (用户可能需要配置代理)
 export 'src/core/http/http_config.dart';
+export 'src/core/http/http_service.dart' show HttpService, RawHttpResponse;
+
+// 加密网关协议
+export 'src/core/security/encrypted_gateway_protocol.dart';
 
 // 面板类型
 export 'src/core/factory/panel_type.dart';

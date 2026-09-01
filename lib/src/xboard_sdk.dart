@@ -54,6 +54,7 @@ class XBoardSDK {
     bool useMemoryStorage = false,
     bool enableLogging = false,
     bool usePrintLogger = false,
+    bool requireEncryptedGateway = false,
   }) async {
     if (_isInitialized) {
       SdkLogger.w('SDK is already initialized. Call dispose() first if you want to re-initialize.');
@@ -94,6 +95,7 @@ class XBoardSDK {
       cleanUrl, 
       tokenManager: _tokenManager, 
       httpConfig: finalHttpConfig,
+      requireEncryptedGateway: requireEncryptedGateway,
     );
 
     // 创建 API 工厂
