@@ -30,7 +30,7 @@ class XBoardTicketApi {
     required String message,
   }) async {
     try {
-      final result = await _httpService.postRequest('/api/v1/user/ticket/withdraw', {
+      final result = await _httpService.postRequest('/api/v1/user/ticket/save', {
         'subject': subject,
         'message': message,
         'level': level,
@@ -52,14 +52,10 @@ class XBoardTicketApi {
   Future<ApiResponse<TicketDetail>> getTicketDetail(int ticketId) async {
     try {
       final result = await _httpService.getRequest('/api/v1/user/ticket/fetch?id=$ticketId');
-      return ApiResponse.fromJson(result, (json) {
-        // 确保messages字段存在且为列表
-        final data = json as Map<String, dynamic>;
-        if (data['messages'] == null) {
-          data['messages'] = [];
-        }
-        return TicketDetail.fromJson(data);
-      });
+      return ApiResponse.fromJson(
+        result,
+        (json) => TicketDetail.fromJson(json as Map<String, dynamic>),
+      );
     } catch (e) {
       if (e is XBoardException) rethrow;
       throw ApiException('获取工单详情时发生错误: $e');

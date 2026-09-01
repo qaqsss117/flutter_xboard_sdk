@@ -19,7 +19,7 @@ abstract class Ticket with _$Ticket {
     String? message,
     @JsonKey(name: 'created_at', fromJson: _fromUnixTimestamp, toJson: _toUnixTimestamp) required DateTime createdAt,
     @JsonKey(name: 'updated_at', fromJson: _fromUnixTimestamp, toJson: _toUnixTimestamp) required DateTime updatedAt,
-    @JsonKey(name: 'user_id') required int userId,
+    @JsonKey(name: 'user_id') @Default(0) int userId,
   }) = _Ticket;
 
   factory Ticket.fromJson(Map<String, dynamic> json) => _$TicketFromJson(json);
@@ -47,10 +47,10 @@ abstract class TicketDetail with _$TicketDetail {
     @JsonKey(name: 'reply_status') required int replyStatus,
     required int status,
     required String subject,
-    @Default([]) List<TicketMessage> messages,
+    @JsonKey(name: 'message') @Default([]) List<TicketMessage> messages,
     @JsonKey(name: 'created_at', fromJson: _fromUnixTimestamp, toJson: _toUnixTimestamp) required DateTime createdAt,
     @JsonKey(name: 'updated_at', fromJson: _fromUnixTimestamp, toJson: _toUnixTimestamp) required DateTime updatedAt,
-    @JsonKey(name: 'user_id') required int userId,
+    @JsonKey(name: 'user_id') @Default(0) int userId,
   }) = _TicketDetail;
 
   factory TicketDetail.fromJson(Map<String, dynamic> json) => _$TicketDetailFromJson(json);
