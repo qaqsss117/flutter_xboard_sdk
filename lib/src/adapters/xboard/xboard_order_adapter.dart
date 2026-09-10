@@ -32,8 +32,12 @@ class XBoardOrderAdapter implements OrderApi {
   }
 
   @override
-  Future<PaymentResultModel> checkoutOrder(String tradeNo, String method) async {
-    final response = await _api.submitPayment(tradeNo: tradeNo, method: method);
+  Future<PaymentResultModel> checkoutOrder(String tradeNo, String method, {String? paymentMode}) async {
+    final response = await _api.submitPayment(
+      tradeNo: tradeNo,
+      method: method,
+      paymentMode: paymentMode,
+    );
 
     if (response.type == -1 && response.data == true) {
       return const PaymentResultModel.success(message: 'Payment successful');

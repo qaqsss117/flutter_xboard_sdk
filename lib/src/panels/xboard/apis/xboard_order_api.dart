@@ -88,6 +88,7 @@ class XBoardOrderApi {
   Future<CheckoutResult> submitPayment({
     required String tradeNo,
     required String method,
+    String? paymentMode,
   }) async {
     try {
       final request = SubmitOrderRequest(
@@ -97,7 +98,10 @@ class XBoardOrderApi {
 
       final result = await _httpService.postRequest(
         "/api/v1/user/order/checkout",
-        request.toJson(),
+        {
+          ...request.toJson(),
+          if (paymentMode != null) 'payment_mode': paymentMode,
+        },
       );
       
       // XBoard 返回: {type: -1, data: true} (免费) 或 {type: 0/1, data: "url"} (付费)

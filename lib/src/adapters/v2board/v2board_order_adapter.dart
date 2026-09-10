@@ -39,7 +39,7 @@ class V2BoardOrderAdapter implements OrderApi {
   }
 
   @override
-  Future<PaymentResultModel> checkoutOrder(String tradeNo, String method) async {
+  Future<PaymentResultModel> checkoutOrder(String tradeNo, String method, {String? paymentMode}) async {
     final response = await _api.submitPayment(tradeNo: tradeNo, method: method);
     
     if (response.type == 1) {

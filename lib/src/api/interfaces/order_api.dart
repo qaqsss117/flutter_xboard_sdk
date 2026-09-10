@@ -5,7 +5,8 @@ import '../models/coupon_model.dart';
 abstract class OrderApi {
   Future<List<OrderModel>> getOrders({int page = 1, int pageSize = 10});
   Future<String> createOrder(int planId, String period, {String? couponCode});
-  Future<PaymentResultModel> checkoutOrder(String tradeNo, String method);
+  /// [paymentMode] requests 'qrcode' or 'url' from gateways that support it.
+  Future<PaymentResultModel> checkoutOrder(String tradeNo, String method, {String? paymentMode});
   Future<OrderModel?> getOrder(String tradeNo);
   Future<bool> cancelOrder(String tradeNo);
   Future<List<PaymentMethodModel>> getPaymentMethods(String tradeNo);
