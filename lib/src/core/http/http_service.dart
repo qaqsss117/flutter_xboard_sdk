@@ -17,6 +17,7 @@ class HttpService {
   late final Dio _dio;
   EncryptedGatewayClient? _encryptedGatewayClient;
   TokenManager? _tokenManager;
+  bool _directConnections = false;
   AuthInterceptor? _authInterceptor;
   String? _expectedCertificatePem;
   bool _certificateLoadFailed = false;
@@ -33,12 +34,14 @@ class HttpService {
     TokenManager? tokenManager,
     HttpConfig? httpConfig,
     bool requireEncryptedGateway = false,
+    bool directConnections = false,
   }) async {
     final config = httpConfig ?? HttpConfig.defaultConfig();
     if (requireEncryptedGateway && config.encryptedGateway == null) {
       throw ConfigException('Encrypted gateway is required but not configured');
     }
     final service = HttpService._internal(baseUrl, config, tokenManager);
+    service._directConnections = directConnections;
 
     if (config.encryptedGateway != null) {
       final gateway = config.encryptedGateway!;
@@ -79,10 +82,12 @@ class HttpService {
     // 配置客户端证书和SSL验证
     (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
       SdkLogger.d('[XBoardSDK] 🔨 创建 HttpClient...');
-      final client = HttpClient();
+      final client = _directConnections
+          ? HttpOverrides.runWithHttpOverrides(() => HttpClient(), _DirectHttpOverrides())
+          : HttpClient();
 
       // 配置代理
-      if (httpConfig.proxyUrl != null && httpConfig.proxyUrl!.isNotEmpty) {
+      if (!_directConnections && httpConfig.proxyUrl != null && httpConfig.proxyUrl!.isNotEmpty) {
         SdkLogger.d('[XBoardSDK] 🔌 配置代理: ${httpConfig.proxyUrl}');
 
         final proxyConfig = _parseProxyConfig(httpConfig.proxyUrl!);
@@ -720,6 +725,14 @@ class HttpService {
 }
 
 const _gatewayRequestIdKey = 'encrypted_gateway.request_id';
+
+class _DirectHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) =>
+      super.createHttpClient(context)
+        ..findProxy = ((_) => 'DIRECT')
+        ..badCertificateCallback = null;
+}
 const _rawGatewayResponseKey = 'encrypted_gateway.raw_response';
 
 class RawHttpResponse {
