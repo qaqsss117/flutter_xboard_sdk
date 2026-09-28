@@ -1,5 +1,6 @@
 // ignore_for_file: invalid_annotation_target
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../api/models/discovery_model.dart';
 
 part 'xboard_config_models.freezed.dart';
 part 'xboard_config_models.g.dart';
@@ -24,6 +25,8 @@ abstract class ConfigData with _$ConfigData {
     @JsonKey(name: 'turnstile_site_key') String? turnstileSiteKey,
     @JsonKey(name: 'app_description') @Default('') String appDescription,
     @JsonKey(name: 'app_url') @Default('') String appUrl,
+    @JsonKey(fromJson: DiscoveryCatalog.fromJson, toJson: DiscoveryCatalog.encode)
+    @Default(DiscoveryCatalog()) DiscoveryCatalog discovery,
     String? logo,
     @JsonKey(name: 'is_recaptcha', fromJson: _intToBoolSafe, toJson: _boolToInt)
     @Default(false) bool isRecaptcha,

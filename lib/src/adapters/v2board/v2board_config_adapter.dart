@@ -28,6 +28,7 @@ class V2BoardConfigAdapter implements ConfigApi {
       turnstileSiteKey: data.turnstileSiteKey,
       appDescription: data.appDescription,
       appUrl: data.appUrl,
+      discovery: data.discovery,
       logo: data.logo,
       isRecaptcha: data.isRecaptcha,
     );

@@ -35,6 +35,7 @@ export 'src/api/interfaces/user_api.dart';
 
 // 模型
 export 'src/api/models/config_model.dart';
+export 'src/api/models/discovery_model.dart';
 export 'src/api/models/invite_model.dart';
 export 'src/api/models/notice_model.dart';
 export 'src/api/models/order_model.dart';
