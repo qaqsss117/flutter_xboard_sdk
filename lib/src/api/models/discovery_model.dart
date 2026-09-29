@@ -73,6 +73,7 @@ class DiscoverySite {
     required this.category,
     this.description = '',
     this.sortOrder = 0,
+    this.logoUrl,
   });
 
   final int id;
@@ -81,6 +82,7 @@ class DiscoverySite {
   final String description;
   final String category;
   final int sortOrder;
+  final String? logoUrl;
 
   static DiscoverySite? tryFromJson(Object? value) {
     if (value is! Map) return null;
@@ -88,6 +90,7 @@ class DiscoverySite {
     final name = value['name'];
     final category = value['category'];
     final uri = DiscoveryCatalog.httpsUri(value['url']);
+    final logoUri = DiscoveryCatalog.httpsUri(value['logo_url']);
     if (id is! int ||
         id <= 0 ||
         name is! String ||
@@ -107,6 +110,7 @@ class DiscoverySite {
           ? value['description'] as String
           : '',
       sortOrder: value['sort_order'] is int ? value['sort_order'] as int : 0,
+      logoUrl: logoUri?.toString(),
     );
   }
 
@@ -117,5 +121,6 @@ class DiscoverySite {
     'description': description,
     'category': category,
     'sort_order': sortOrder,
+    if (logoUrl != null) 'logo_url': logoUrl,
   };
 }
